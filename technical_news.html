@@ -1,12 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Technical News</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News</title>
+    <link rel="stylesheet" href="css/news_style.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        p {
+            margin: 5px 0;
+        }
+        a {
+            color: #61afef;
+            text-decoration: none;
+        }
+        .news_container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        /* Media Query for Tablet and Mobile */
+        @media (max-width: 768px) {
+            .project-container {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+        /* Project Card */
+        .news_card {
+            padding: 20px;
+            border: 1px solid #31353e;
+        }
+        body {
+            font-size: 18px;
+            color: #b1adac;
+            background-color: #1e222b;
+            margin: 0 auto;
+            padding: 0 50px;
+            box-sizing: border-box;
+        }
+        hr { border: none; height: 2px; background-color: #31353e; width: 100%; margin: 30px auto; }
+    </style>
 </head>
 <body>
-  <h2>Technical News (ML, CV, NLP)</h2>
-  <p>Content coming soon...</p>
-  <a href="index.html">⬅ Back to Home</a>
+    <br>
+    <small><a href="index.html" style="color:#c4777f;">  < Back to home</a></small>
+    <h1>Top 25 Hacker News Stories</h1>
+    From <a href="https://news.ycombinator.com/" style="color:#c4777f;">Hacker News</a><br><br>
+    <div class="news_container" id="stories"></div>
+
+    <script>
+        // Function to format the date and time
+    function formatStoryTime(storyTime) {
+        // Split the date and time string
+        const [datePart, timePart] = storyTime.split(', ');
+
+        // Convert date part from "DD/MM/YYYY" to "MM/DD/YYYY" for correct parsing by Date object
+        const [day, month, year] = datePart.split('/');
+        const formattedDateStr = `${month}/${day}/${year} ${timePart}`;
+
+        // Create a new Date object
+        const date = new Date(formattedDateStr);
+
+        // Get the time in the desired format (e.g., 06:58 am)
+        const timeString = date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+        });
+
+        // Get the date in the desired format (e.g., August 29, 2024)
+        const dateString = date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        // Combine time and date with separator
+        return `${dateString} | ${timeString}`;
+    }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp * 1000);  // Convert to milliseconds
+            return date.toLocaleString();  // Convert to local date-time string
+        }
+        // Fetch latest stories from Hacker News
+        fetch('https://hacker-news.firebaseio.com/v0/topstories.json')
+            .then(response => response.json())
+            .then(storyIds => {
+                // Limit to 25 stories
+                const top10StoryIds = storyIds.slice(0, 25);
+                const storyPromises = top10StoryIds.map(id => {
+                    const storyUrl = `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
+                    return fetch(storyUrl).then(response => response.json());
+                });
+                // Wait for all stories to be fetched
+                Promise.all(storyPromises).then(stories => {
+                    const storiesContainer = document.getElementById('stories');
+
+                    stories.forEach((story,index) => {
+                        const storyElement = document.createElement('div');
+                        const titleColor = index % 2 === 0 ? '#61afef;' : '#60bec9';
+                        storyElement.className = 'news_card';
+                        storyElement.innerHTML = `
+                            <a href="${story.url}" target="_blank" style="color:${titleColor};font-size:22px;">${story.title}</a>
+                            <small><p style="color:grey">${formatStoryTime(formatTimestamp(story.time))}</p>
+                            <p>By: ${story.by}<p>
+                            <p style="color:#e0c084;">Score: ${story.score}</p></small>
+                            
+                            </div>
+                        `;
+                        storiesContainer.appendChild(storyElement);
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching stories:', error);
+            });
+    </script>
 </body>
 </html>
