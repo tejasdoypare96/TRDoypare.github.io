@@ -1,12 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Technical News</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Sports & Politics News</title>
+    <link rel="stylesheet" href="css/news_style.css">
+    <style>
+        body {
+            font-size: 18px;
+            color: #b1adac;
+            background-color: #1e222b;
+            margin: 0 auto;
+            padding: 0 50px;
+            box-sizing: border-box;
+        }
+        .news_container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        .news_card {
+            padding: 20px;
+            border: 1px solid #31353e;
+        }
+        a { color: #61afef; text-decoration: none; }
+        hr { border: none; height: 2px; background-color: #31353e; margin: 30px 0; }
+    </style>
 </head>
 <body>
-  <h2>Technical News (ML, CV, NLP)</h2>
-  <p>Content coming soon...</p>
-  <a href="index.html">⬅ Back to Home</a>
+
+<br>
+<small><a href="index.html" style="color:#c4777f;">&lt; Back to home</a></small>
+
+<h1>Indian Sports & Politics News</h1>
+From <a href="https://news.google.com/" style="color:#c4777f;">Google News (India)</a>
+<br><br>
+
+<div class="news_container" id="news"></div>
+
+<script>
+const rssUrl =
+  "https://api.rss2json.com/v1/api.json?rss_url=" +
+  encodeURIComponent("https://news.google.com/rss/search?q=India+Sports+Politics&hl=en-IN&gl=IN&ceid=IN:en");
+
+fetch(rssUrl)
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("news");
+    data.items.slice(0, 25).forEach((item, index) => {
+      const color = index % 2 === 0 ? "#61afef" : "#60bec9";
+      const div = document.createElement("div");
+      div.className = "news_card";
+      div.innerHTML = `
+        <a href="${item.link}" target="_blank" style="color:${color};font-size:22px;">
+          ${item.title}
+        </a>
+        <p style="color:grey">${new Date(item.pubDate).toLocaleString()}</p>
+        <p style="color:#e0c084;">Source: ${item.source}</p>
+      `;
+      container.appendChild(div);
+    });
+  })
+  .catch(err => console.error(err));
+</script>
+
 </body>
 </html>
